@@ -1,0 +1,54 @@
+name: CD — Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ master ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Inject build metadata
+        run: |
+          BUILD_NUMBER=${{ github.run_number }}
+          COMMIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "window.ENV = { BUILD_NUMBER: '${BUILD_NUMBER}', COMMIT_SHA: '${COMMIT_SHA}' };" > app/env.js
+          echo "✓ Build #${BUILD_NUMBER} (${COMMIT_SHA}) injected"
+
+      - name: Add env.js to index.html
+        run: |
+          sed -i 's|<script src="app.js"></script>|<script src="env.js"></script><script src="app.js"></script>|' app/index.html
+          echo "✓ env.js linked in index.html"
+
+      - name: Site URL
+        run: |
+          echo "Site URL: https://azizselmi873-creator.github.io/devpulse-cicd/"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './app'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

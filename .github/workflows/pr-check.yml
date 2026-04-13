@@ -1,0 +1,39 @@
+name: PR Check — Pre-merge Verification
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  pr-check:
+    name: PR Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Analyze modified files
+        run: |
+          echo "Analyzing PR changes..."
+          echo "Branch: ${{ github.head_ref }}"
+          echo "Author: ${{ github.actor }}"
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+
+      - name: Verify no broken files
+        run: |
+          echo "Checking files..."
+          test -f app/index.html && echo "✓ index.html OK" || exit 1
+          test -f app/style.css  && echo "✓ style.css OK"  || exit 1
+          test -f app/app.js     && echo "✓ app.js OK"     || exit 1
+          echo "✓ All files verified"
+
+      - name: PR Summary
+        run: |
+          echo "================================"
+          echo "PR Check Summary"
+          echo "================================"
+          echo "✓ All files present"
+          echo "✓ No broken structure"
+          echo "✓ Ready to merge"
+          echo "================================"

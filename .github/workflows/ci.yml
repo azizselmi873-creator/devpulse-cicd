@@ -1,0 +1,33 @@
+name: CI — Validation
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  validate:
+    name: HTML Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify required files are present
+        run: |
+          echo "Checking required files..."
+          test -f app/index.html && echo "✓ index.html found" || exit 1
+          test -f app/style.css  && echo "✓ style.css found"  || exit 1
+          test -f app/app.js     && echo "✓ app.js found"     || exit 1
+          echo "✓ All required files are present"
+
+      - name: Validate HTML structure
+        run: |
+          echo "Validating HTML..."
+          grep -q "<!DOCTYPE html>" app/index.html && echo "✓ DOCTYPE found" || exit 1
+          grep -q "<title>" app/index.html && echo "✓ title tag found" || exit 1
+          grep -q "style.css" app/index.html && echo "✓ CSS link found" || exit 1
+          grep -q "app.js" app/index.html && echo "✓ JS script found" || exit 1
+          echo "✓ HTML validation passed"ok
