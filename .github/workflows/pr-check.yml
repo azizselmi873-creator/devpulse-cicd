@@ -2,7 +2,7 @@ name: PR Check — Pre-merge Verification
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   pr-check:
